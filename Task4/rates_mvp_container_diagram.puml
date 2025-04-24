@@ -1,0 +1,20 @@
+@startuml
+title Диаграмма контейнеров: Передача депозитных ставок в кол-центры
+
+left to right direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml    
+
+    System_Boundary(Банк, "Банк") {
+        ContainerDb(АБС, "АБС", "Oracle 19c", "Основное хранение ставок")
+        Container(Сервис_Ставок, "Сервис ставок", "Java 17", "Трансформация и выгрузка")
+        Container(SFTP, "SFTP-сервер", "RHEL 8", "Хранение файлов 24ч")
+    }
+    System(КоллЦентр, "Внутренний колл-центр", "CRM на Java")
+    System(Партнер, "Партнерский колл-центр", "Внешняя система")
+
+    Rel(АБС, Сервис_Ставок, "JDBC", "Вызов каждые 15 мин")
+    Rel(Сервис_Ставок, SFTP, "SCP", "PGP-шифрование")
+    Rel(SFTP, КоллЦентр, "SFTP", "Автозагрузка")
+    Rel(SFTP, Партнер, "SFTP", "По расписанию")
+@enduml

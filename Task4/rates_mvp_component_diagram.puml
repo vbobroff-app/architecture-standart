@@ -1,0 +1,39 @@
+@startuml
+title Диаграмма компонентов: Передача депозитных ставок в кол-центры
+
+left to right direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml    
+
+System_Boundary(Банк, "Банковские системы") {
+        ContainerDb(АБС, "АБС", "Oracle 19c", "Основное хранилище ставок") {
+            Component(Ставки_АБС, "Модуль ставок", "PL/SQL", "Расчет и хранение ставок")
+            Component(Транзакции, "Транзакционный модуль", "Delphi", "Обработка операций")
+        }
+
+        Container(Сервис_Ставок, "Сервис экспорта ставок", "Java 17 + Spring Boot") {
+            Component(API, "REST API", "Spring Web", "Прием запросов от АБС")
+            Component(CSV_Generator, "Генератор CSV", "Apache Commons CSV", "Формирование файлов")
+            Component(PGP_Module, "PGP-шифрование", "Bouncy Castle", "Шифрование файлов")
+            Component(Scheduler, "Планировщик", "Quartz", "Управление расписанием")
+        }
+
+        Container(SFTP_Server, "SFTP-сервер", "RHEL 8 + OpenSSH") {
+            Component(Storage, "Хранилище", "Ext4", "Временные файлы (TTL=24h)")
+            Component(Auth, "Аутентификация", "SSH-ключи", "Доступ для колл-центров")
+        }
+    }
+
+    System_Ext(КоллЦентр_CRM, "CRM банковского колл-центра", "Java EE") {
+        Component(CSV_Loader, "Загрузчик CSV", "Spring Batch", "Импорт данных")
+    }
+
+    System_Ext(Партнер_CRM, "CRM партнера", "Внешняя система")
+
+    Rel(Ставки_АБС, API, "JDBC", "Вызов каждые 15 мин")
+    Rel(API, CSV_Generator, "DTO -> CSV", "In-memory трансформация")
+    Rel(CSV_Generator, PGP_Module, "Шифрование", "4096-bit RSA")
+    Rel(PGP_Module, Storage, "SCP upload", "PGP-файлы")
+    Rel(Storage, CSV_Loader, "SFTP pull", "Автоимпорт каждые 5 мин")
+    Rel(Storage, Партнер_CRM, "SFTP push", "Ручная загрузка 1р/день")
+@enduml
