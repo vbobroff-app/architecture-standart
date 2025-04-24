@@ -1,0 +1,73 @@
+@startuml
+left to right direction
+skinparam defaultTextAlignment center
+
+' Настройки цветов
+skinparam ArrowColor #0055FF      ' Ярко-синие стрелки
+skinparam ArrowFontColor #0055FF  ' Цвет текста на стрелках
+
+' Стили элементов
+skinparam Actor {
+  BackgroundColor #007FFF
+  FontColor black
+  BorderColor #003399
+}
+
+skinparam UseCase {
+  BorderColor #0055FF
+  FontColor white
+  FontStyle normal
+}
+
+skinparam Database {
+  FontStyle normal
+}
+
+' Элементы диаграммы
+actor "Клиент" as A #007FFF
+
+rectangle {
+  usecase "Сайт" as B #007FFF
+  usecase "Интернет-банк" as B2 #007FFF
+  usecase "Колл-центры" as C #007FFF
+  usecase "Сотрудник фронт-офиса" as D #007FFF
+  
+  rectangle "Бэк-офис" {
+    usecase "Сотрудник бэк-офиса\nдепозитный отдел" as E #FF69B4
+    usecase "Сотрудник бэк-офиса\nкредитный отдел" as G #FF69B4
+  }
+  
+  file "Excel-файлы с ставками" as F #B0E0E6
+  file "Excel-файлы с рисками" as H #B0E0E6
+
+  rectangle "    АБС    " as I #DDDDF7 
+  component "СМС-шлюз" as J #DDDDF7
+}
+
+' Связи с ярко-синими стрелками
+A -[#0055FF]-> B
+A -[#0055FF]-> B2
+A -[#0055FF]-> C
+A -[#0055FF]-> D
+G -[#0055FF]-> D : Отправляет ставки по email
+D -[#0055FF]-> E
+E -[#0055FF]-> F
+G -[#0055FF]-> H
+G -[#0055FF]-> I
+B -[#0055FF]-> I
+B2 -[#0055FF]-> I
+C -[#0055FF]-> I
+D -[#0055FF]-> I
+E -[#0055FF]-> I
+I -[#0055FF]-> J
+J -[#0055FF]-> A
+
+' Пунктирные линии для ручных процессов
+F -[#0055FF,dotted]-> E : Ручной ввод
+H -[#0055FF,dotted]-> G : Ручной расчет
+
+
+' Пунктирные линии для ручных процессов
+F -[dotted]-> E : Ручной ввод
+H -[dotted]-> G : Ручной расчет
+@enduml
